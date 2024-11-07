@@ -21,7 +21,7 @@ end
 
 function M.UpplyConfig(userConfig)
   if(vim.fn.maparg('n', config.keymap) ~= "") then vim.keymap.del('n', config.keymap) end
-  config = vim.tbl_extend('force', config, userConfig or {})
+  config = vim.tbl_deep_extend('force', config, userConfig or {})
   vim.keymap.set('n', config.keymap, function() require('kitty_preview').NvimTreePreview() end, { desc = 'Preview image under cursor' })
 end
 
