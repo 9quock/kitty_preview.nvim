@@ -1,42 +1,50 @@
 local M = {}
 
+
+local config = {
+  keymap = '<leader>P',
+  replace = '%%path%%',
+  mappings = {
+    icat = {'bmp', 'jpg', 'jpeg', 'png'},
+    mpv = {'mp4', 'gif', 'mp3'},
+  },
+  previewers = {
+    icat = 'kitty icat --hold "%path%"',
+    mpv = 'mpv --vo=kitty --loop "%path%"',
+  }
+}
+
+
 local function GetFileExtension(url)
-    return url:match("^.+(%..+)$")
+  return url:match('^.+%.(.+)$')
 end
 
-function M.IsImage(url)
-    local extension = GetFileExtension(url)
+function M.UpplyConfig(userConfig)
+  if(vim.fn.maparg('n', config.keymap) ~= "") then vim.keymap.del('n', config.keymap) end
+  config = vim.tbl_extend('force', config, userConfig or {})
+  vim.keymap.set('n', config.keymap, function() require('kitty_preview').NvimTreePreview() end, { desc = 'Preview image under cursor' })
+end
 
-    if extension == '.bmp' then
-        return true
-    elseif extension == '.jpg' or extension == '.jpeg' then
-        return true
-    elseif extension == '.png' then
-        return true
-    elseif extension == '.gif' then
-        return true
+function M.Preview(absolutePath)
+  local fileExtension = GetFileExtension(absolutePath)
+  for k, v in pairs(config.mappings) do
+    if(vim.tbl_contains(v, fileExtension)) then
+      vim.api.nvim_command('silent !kitty @ --to=$KITTY_LISTEN_ON launch --type=window ' .. config.previewers[k]:gsub(config.replace, absolutePath))
+      return
     end
-
-    return false
+  end
+  print('No preview for file ' .. absolutePath)
 end
 
-function M.PreviewImage(absolutePath)
-    if M.IsImage(absolutePath) then
-        vim.api.nvim_command('silent !kitty @ --to=$KITTY_LISTEN_ON launch --type=window kitty icat --hold "' .. absolutePath .. '"')
-    else
-        print("No preview for file " .. absolutePath)
-    end
-end
-
-function M.PreviewImageNvimTree()
-  local kitty_preview = require("kitty_preview")
-  local nvimtree = require("nvim-tree.api")
+function M.NvimTreePreview()
+  local kitty_preview = require('kitty_preview')
+  local nvimtree = require('nvim-tree.api')
   local path = nvimtree.tree.get_node_under_cursor().absolute_path
-  kitty_preview.PreviewImage(path)
+  kitty_preview.Preview(path)
 end
 
-function M.setup()
-  vim.keymap.set("n", "<leader>P", function() require("kitty_preview").PreviewImageNvimTree() end, { desc = "Preview image under cursor" })
+function M.setup(userConfig)
+  require('kitty_preview').UpplyConfig(userConfig)
 end
 
 return M
