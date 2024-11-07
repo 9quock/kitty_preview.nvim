@@ -3,6 +3,7 @@ local M = {}
 
 local config = {
   keymap = '<leader>P',
+  prefix = 'silent !kitty @ --to=$KITTY_LISTEN_ON launch --type=window ',
   mappings = {
     image = {'bmp', 'jpg', 'jpeg', 'png'},
     video = {'mp4', 'gif', 'mp3'},
@@ -28,7 +29,7 @@ function M.Preview(absolutePath)
   local fileExtension = GetFileExtension(absolutePath)
   for k, v in pairs(config.mappings) do
     if(vim.tbl_contains(v, fileExtension)) then
-      vim.api.nvim_command('silent !kitty @ --to=$KITTY_LISTEN_ON launch --type=window ' .. config.previewers[k]:gsub('%%path%%', absolutePath))
+      vim.api.nvim_command(config.prefix .. config.previewers[k]:gsub('%%path%%', absolutePath))
       return
     end
   end
