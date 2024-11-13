@@ -15,8 +15,12 @@ local config = {
 }
 
 
-local function GetFileExtension(url)
-  return url:match('^.+%.(.+)$')
+-- checkFileExtension is a horrible name btw, but i can't come up with anything better
+local function checkFileExtension(fileExtensionList, path)
+  for _, extension in ipairs(fileExtensionList) do
+    if(path:sub(-#extension) == extension) then return true end
+  end
+  return false
 end
 
 function M.UpplyConfig(userConfig)
@@ -26,9 +30,8 @@ function M.UpplyConfig(userConfig)
 end
 
 function M.Preview(absolutePath)
-  local fileExtension = GetFileExtension(absolutePath)
   for k, v in pairs(config.mappings) do
-    if(vim.tbl_contains(v, fileExtension)) then
+    if(checkFileExtension(v, absolutePath)) then
       vim.api.nvim_command(config.prefix .. config.previewers[k]:gsub('%%path%%', absolutePath))
       return
     end
