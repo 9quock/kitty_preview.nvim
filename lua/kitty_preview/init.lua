@@ -5,8 +5,8 @@ local config = {
   keymap = '<leader>P',
   prefix = 'silent !kitty @ --to=$KITTY_LISTEN_ON launch --type=window ',
   mappings = {
-    image = {'bmp', 'jpg', 'jpeg', 'png'},
-    video = {'mp4', 'gif', 'mp3'},
+    image = {'.bmp', '.jpg', '.jpeg', '.png'},
+    video = {'.mp4', '.gif', '.mp3'},
   },
   previewers = {
     image = 'kitty icat --hold "%path%"',
